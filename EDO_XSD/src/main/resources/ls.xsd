@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns="https://roseu.org/upload/iblock/fc7/logical-message-v1.xsd" 
+xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="https://roseu.org/upload/iblock/fc7/logical-message-v1.xsd" 
+elementFormDefault="qualified">
+ <xs:element name="Message" type="Message"/>
+ <xs:element name="Invitation" type="Invitation"/>
+ <xs:element name="Receipts" type="Receipts"/>
+ 
+ <!-- Message -->
+ <xs:complexType name="Message">
+ <xs:sequence minOccurs="1" maxOccurs="1">
+ <xs:element name="Document" type="Document" minOccurs="0" maxOccurs="unbounded"/>
+ <xs:element name="ES" type="ES" minOccurs="0" maxOccurs="unbounded"/>
+ </xs:sequence>
+ <xs:attribute name="Sender" type="IDMemberEDO" use="required"/>
+ <xs:attribute name="Receiver" type="IDMemberEDO" use="required"/>
+ <xs:attribute name="ReceiverDepartmentID" use="optional">
+ <xs:simpleType>
+ <xs:restriction base="xs:string">
+ <xs:maxLength value="255"/>
+ <xs:minLength value="0"/>
+ </xs:restriction>
+ </xs:simpleType>
+ </xs:attribute>
+ <xs:attribute name="SendDate" type="DateTimeUTC" use="required"/>
+ </xs:complexType>
+ 
+ <!-- Invitation к обмену ЭДО -->
+ <xs:complexType name="Invitation">
+ <xs:sequence minOccurs="1" maxOccurs="1">
+ <xs:element name="OrgSender" type="OrganizationSender"/>
+ <xs:element name="OrgReceiver" type="OrganizationReceiver" minOccurs="1" maxOccurs="1"/>
+ <xs:element name="Document" type="Document" minOccurs="0" maxOccurs="1"/>
+ <xs:element name="ES" type="ES" minOccurs="0" maxOccurs="1"/>
+ <xs:element name="Comment" type="xs:string" minOccurs="0" maxOccurs="1"/>
+ </xs:sequence>
+ <xs:attribute name="SendDate" type="DateTimeUTC" use="required"/>
+ <xs:attribute name="Type" type="RequestType" use="required"/>
+ </xs:complexType>
+ 
+ <!-- Организация Sender для автороуминга -->
+ <xs:complexType name="OrganizationSender">
+ <xs:attribute name="Id" type="IDMemberEDO" use="required"/>
+ <xs:attribute name="TaxID" type="TaxIdType" use="required"/>
+ <xs:attribute name="ReasonCode" type="ReasonCodeType" use="optional"/>
+ <xs:attribute name="NameOrg" type="xs:string" use="required"/>
+ </xs:complexType>
+ 
+ <!-- Организация Receiver для автороуминга -->
+ <xs:complexType name="OrganizationReceiver">
+ <xs:attribute name="ID" type="IDMemberEDO" use="required"/>
+ <xs:attribute name="TaxId" type="TaxIdType" use="optional"/>
+ <xs:attribute name="ReasonCode" type="ReasonCodeType" use="optional"/>
+
+ <xs:attribute name="OrgName" type="xs:string" use="optional"/>
+ </xs:complexType>
+ 
+ <!-- Document -->
+ <xs:complexType name="Document">
+ <xs:sequence minOccurs="1" maxOccurs="1">
+ <xs:element name="ToDocument" type="Identifier" minOccurs="0" maxOccurs="unbounded"/>
+ <xs:element name="InternalID" type="xs:string" minOccurs="0" maxOccurs="1"/>
+ <xs:element name="DealID" type="xs:string" minOccurs="0" maxOccurs="1"/>
+ <xs:element name="Number" type="xs:string" minOccurs="0" maxOccurs="1"/>
+ <xs:element name="Date" type="xs:date" minOccurs="1" maxOccurs="1"/>
+ <xs:element name="Sum" type="xs:decimal" minOccurs="0" maxOccurs="1"/>
+ <xs:element name="SumVat" type="xs:decimal" minOccurs="0" maxOccurs="1"/>
+ <xs:element name="AdditionalData" minOccurs="0" maxOccurs="1">
+ <xs:complexType>
+ <xs:sequence>
+ <xs:element name="AdditionalParam" maxOccurs="unbounded">
+ <xs:complexType>
+ <xs:attribute name="Name" use="required"/>
+ <xs:attribute name="Value" use="required"/>
+ </xs:complexType>
+ </xs:element>
+ </xs:sequence>
+ </xs:complexType>
+ </xs:element>
+ </xs:sequence>
+ <xs:attribute name="DocumentId" type="Identifier" use="required"/>
+ <xs:attribute name="DocType" type="DocumentType" use="required"/>
+ <xs:attribute name="RecipientSignatureExpected" type="xs:boolean" use="optional" 
+default="false"/>
+ <xs:attribute name="FileName" type="FileName" use="required"/>
+ <xs:attribute name="Encrypted" type="xs:boolean" use="optional" default="false"/>
+ </xs:complexType>
+ 
+ <!-- Электронная подпись -->
+ <xs:complexType name="ES">
+ <xs:attribute name="Signatory" type="IDMemberEDO" use="required"/>
+ <xs:attribute name="ESId" type="Identifier" use="required"/>
+ <xs:attribute name="ToDocument" type="Identifier" use="required"/>
+ </xs:complexType>
+ 
+ <!-- Receipts -->
+ <xs:complexType name="Receipts">
+ <xs:sequence minOccurs="1" maxOccurs="1">
+ <xs:element name="ErrorHandling" type="ReceiptErrorHandling" minOccurs="0" 
+maxOccurs="unbounded"/>
+ <xs:element name="UnknownId" type="ReceiptErrorUnknownId" minOccurs="0" 
+maxOccurs="unbounded"/>
+ <xs:element name="Success" type="ReceiptSuccess" minOccurs="0" maxOccurs="unbounded"/>
+ </xs:sequence>
+ <xs:attribute name="SendDate" use="required">
+ <xs:annotation>
+ <xs:documentation>Date и время в формате UTC формирования квитанций</xs:documentation>
+ </xs:annotation>
+ </xs:attribute>
+ <xs:attribute name="Receiver" type="OperatorId" use="required">
+ <xs:annotation>
+ <xs:documentation>Указывается наименование оператора получателя ЛС</xs:documentation>
+ </xs:annotation>
+ </xs:attribute>
+ </xs:complexType>
+ 
+ <!-- Квитанция "Success" -->
+ <xs:complexType name="ReceiptSuccess">
+ <xs:annotation>
+ <xs:documentation>
+ Свидетельствует об успешной обработке ЛС с соответствующим Identifierом
+ </xs:documentation>
+ </xs:annotation>
+ <xs:sequence minOccurs="1" maxOccurs="1">
+ <xs:element name="Document" type="Document" minOccurs="0" maxOccurs="unbounded"/>
+ <xs:element name="ES" type="ES" minOccurs="0" maxOccurs="unbounded"/>
+ </xs:sequence>
+ <xs:attribute name="LMId" type="Identifier" use="required"/>
+ </xs:complexType>
+ 
+ <!-- Квитанция "Неизвестный ИД" -->
+ <xs:complexType name="ReceiptErrorUnknownId">
+ <xs:annotation>
+ <xs:documentation>
+ Document или ES из обрабатываемого ЛС ссылается на неизвестный системе Document.
+ Эта ошибка может возникать, если ТП с хронологически более поздними Documentами будет по 
+какой-то причине
+ (например, из-за разового сбоя транспорта) получено и обработано ранее,
+ ТП с хронологически более ранними Documentами.
+ Необходимо повторить отправку данного ЛС через некоторое время.
+ Если ошибка повторяется постоянно, разобраться в причинах ошибки и устранить их вручную.
+ </xs:documentation>
+ </xs:annotation>
+ <xs:sequence minOccurs="1" maxOccurs="1">
+ <xs:element name="ID" type="Identifier" minOccurs="1" maxOccurs="unbounded">
+ <xs:annotation>
+ <xs:documentation>
+ Перечень неизвестных системе Identifierов
+ </xs:documentation>
+ </xs:annotation>
+ </xs:element>
+ <xs:element name="Description" type="xs:string" minOccurs="1" maxOccurs="1"/>
+ </xs:sequence>
+ <xs:attribute name="LMId" type="Identifier" use="required"/>
+ </xs:complexType>
+ 
+ <!-- Квитанция "Ошибка обработки" -->
+ <xs:complexType name="ReceiptErrorHandling">
+ <xs:annotation>
+ <xs:documentation>
+ В процессе обработки возникла какая-либо другая ошибка.
+ Необходимо разобраться в причинах ошибки и устранить их вручную.
+ </xs:documentation>
+ </xs:annotation>
+ <xs:sequence minOccurs="1" maxOccurs="1">
+ <xs:element name="Description" type="xs:string" minOccurs="1" maxOccurs="1"/>
+ </xs:sequence>
+ <xs:attribute name="LMId" type="Identifier" use="required"/>
+ </xs:complexType>
+ 
+ <!-- Определения простых типов -->
+ <xs:simpleType name="DocumentType">
+ <xs:restriction base="xs:string">
+  <xs:enumeration value = "Order" />
+  <xs:enumeration value = "SF" />
+  <xs:enumeration value = "OperatorConfirmation" />
+  <xs:enumeration value = "ReceivedNotice" />
+  <xs:enumeration value = "EnumerationNotice" />
+  <xs:enumeration value = "CancellationProposal" />
+  <xs:enumeration value = "Trade12SellerTitle" />
+  <xs:enumeration value = "Trade12BuyerTitle" />
+  <xs:enumeration value = "Bidding2TitleofAdditionalInformationonAcceptanceResults" />
+  <xs:enumeration value = "Trade2BuyerTitle" />
+  <xs:enumeration value = "CustomerTitleDeed" />
+  <xs:enumeration value = "TitleDeedoftheExecutor" />
+  <xs:enumeration value = "KC-11" />
+  <xs:enumeration value = "KC-2" />
+  <xs:enumeration value = "KC-3" />
+  <xs:enumeration value = "Statement" />
+  <xs:enumeration value = "DocumentAboutSubmissionofWorkResultsContractor" />
+  <xs:enumeration value = "DocumentAboutSubmissionofWorkResultsCustomer" />
+  <xs:enumeration value = "DocumentAbouttheTransferofGoodsDuringTradeTransactionsSeller" />
+  <xs:enumeration value = "DocumentAbouttheTransferofGoodsDuringTradeTransactionsbytheBuyer" />
+  <xs:enumeration value = "SCF" />
+  <xs:enumeration value = "SCHFDPSeller" />
+  <xs:enumeration value = "SCHFDOPBuyer" />
+  <xs:enumeration value = "DOPSellerInvoice" />
+  <xs:enumeration value = "DOPSellerAct" />
+  <xs:enumeration value = "OPTIONALBuyerInvoice" />
+  <xs:enumeration value = "AdditionalBuyerAct" />
+  <xs:enumeration value = "DOPSeller" />
+  <xs:enumeration value = "EXTRABuyer" />
+  <xs:enumeration value = "CorSCHF" />
+  <xs:enumeration value = "CorSCHFDISSeller" />
+  <xs:enumeration value = "CorSCHFDISBuyer" />
+  <xs:enumeration value = "CorDISSellerInvoice" />
+  <xs:enumeration value = "CorDISSellerAct" />
+  <xs:enumeration value = "CorDISBuyer Invoice" />
+  <xs:enumeration value = "CorDISBuyerAct" />
+  <xs:enumeration value = "CorDISSeller" />
+  <xs:enumeration value = "CorDISBuyer" />
+  <xs:enumeration value = "Account" />
+  <xs:enumeration value = "StructuredData">
+<xs:annotation>
+ <xs:documentation>
+ Структурированные данные (например в формате xml),
+ передаваемые вместе с печатной формой Documentа.
+ У Documentа такого типа скорее всего должен быть указан Identifier ToDocument
+ </xs:documentation>
+ </xs:annotation>
+ </xs:enumeration>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+ <!-- Тип запроса в приглашении -->
+ <xs:simpleType name="RequestType">
+ <xs:annotation>
+ <xs:documentation>
+ При отправке приглашения и принятии приглашения необходимо указывать тип "Запрос".
+40
+ Для отказа в принятии прглашения необходимо указывать тип "Разрыв".
+ Для разрыва уже установленного ЭДО необходимо указывать тип "Разрыв".
+ </xs:documentation>
+ </xs:annotation>
+ <xs:restriction base="xs:string">
+ <xs:enumeration value="Запрос"/>
+ <xs:enumeration value="Разрыв"/>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+ <!-- Identifier -->
+ <xs:simpleType name="Identifier">
+ <xs:restriction base="xs:string">
+ <xs:pattern value="[a-z0-9]{32}"/>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+ <!-- Identifier участника ЭДО -->
+ <xs:simpleType name="IDMemberEDO">
+ <xs:annotation>
+ <xs:documentation>
+ Identifier участника Documentооборота
+ Формат Identifierа: [IdentifierОператора>][IdentifierАбонента].
+ IdentifierАбонента может быть уникален лишь в рамках одного оператора, длина не более 43 
+символов.
+ IdentifierОператора должен быть глобально уникальным, длина 3 символа.
+ </xs:documentation>
+ </xs:annotation>
+ <xs:restriction base="xs:string">
+ <xs:minLength value="3"/>
+ <xs:maxLength value="46"/>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+ <!-- Identifier оператора -->
+ <xs:simpleType name="OperatorId">
+ <xs:annotation>
+ <xs:documentation>
+ Identifier оператора должен быть глобально уникальным, длина 3 символа.
+ </xs:documentation>
+ </xs:annotation>
+ <xs:restriction base="xs:string">
+ <xs:length value="3"/>
+ <xs:pattern value="[A-Z0-9]{3}"/>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+ <!-- Имя файла -->
+ <xs:simpleType name="FileName">
+ <xs:restriction base="xs:string">
+ <xs:pattern value="[^/\\:?*]{1,255}"/>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+ <!-- DateTimeUTC -->
+ <xs:simpleType name="DateTimeUTC">
+ <xs:restriction base="xs:dateTime">
+ <xs:pattern value=".+T.+Z"/>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+
+ <!-- Тип для ИНН -->
+ <xs:simpleType name="TaxIdType">
+ <xs:annotation>
+ <xs:documentation>Идентификационный Number налогоплательщика</xs:documentation>
+ </xs:annotation>
+ <xs:restriction base="xs:string">
+ <xs:minLength value="10"/>
+ <xs:maxLength value="12"/>
+ <xs:pattern value="([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}"/>
+ <xs:pattern value="([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{10}"/>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+ <!-- Тип для ReasonCode -->
+ <xs:simpleType name="ReasonCodeType">
+ <xs:annotation>
+ <xs:documentation>Код причины постановки на учет (ReasonCode) </xs:documentation>
+ </xs:annotation>
+ <xs:restriction base="xs:string">
+ <xs:length value="9"/>
+ <xs:pattern value="([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-F]{2})([0-9]{3})"/>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+</xs:schema>

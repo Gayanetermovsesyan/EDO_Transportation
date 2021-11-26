@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns="https://roseu.org/upload/iblock/fc7/logical-message-v1.xsd" 
+xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="https://roseu.org/upload/iblock/fc7/logical-message-v1.xsd" 
+elementFormDefault="qualified">
+ <xs:element name="Сообщение" type="Сообщение"/>
+ <xs:element name="Приглашение" type="Приглашение"/>
+ <xs:element name="Квитанции" type="Квитанции"/>
+ 
+ <!-- Сообщение -->
+ <xs:complexType name="Сообщение">
+ <xs:sequence minOccurs="1" maxOccurs="1">
+ <xs:element name="Документ" type="Документ" minOccurs="0" maxOccurs="unbounded"/>
+ <xs:element name="ЭП" type="ЭП" minOccurs="0" maxOccurs="unbounded"/>
+ </xs:sequence>
+ <xs:attribute name="Отправитель" type="ИдУчастЭДО" use="required"/>
+ <xs:attribute name="Получатель" type="ИдУчастЭДО" use="required"/>
+ <xs:attribute name="ИдПодразделенияПолучателя" use="optional">
+ <xs:simpleType>
+ <xs:restriction base="xs:string">
+ <xs:maxLength value="255"/>
+ <xs:minLength value="0"/>
+ </xs:restriction>
+ </xs:simpleType>
+ </xs:attribute>
+ <xs:attribute name="ДатаОтправки" type="ДатаВремяUTC" use="required"/>
+ </xs:complexType>
+ 
+ <!-- Приглашение к обмену ЭДО -->
+ <xs:complexType name="Приглашение">
+ <xs:sequence minOccurs="1" maxOccurs="1">
+ <xs:element name="ОргОтпр" type="ОрганизацияОтправитель"/>
+ <xs:element name="ОргПол" type="ОрганизацияПолучатель" minOccurs="1" maxOccurs="1"/>
+ <xs:element name="Документ" type="Документ" minOccurs="0" maxOccurs="1"/>
+ <xs:element name="ЭП" type="ЭП" minOccurs="0" maxOccurs="1"/>
+ <xs:element name="Комментарий" type="xs:string" minOccurs="0" maxOccurs="1"/>
+ </xs:sequence>
+ <xs:attribute name="ДатаОтправки" type="ДатаВремяUTC" use="required"/>
+ <xs:attribute name="Тип" type="ТипЗапроса" use="required"/>
+ </xs:complexType>
+ 
+ <!-- Организация отправитель для автороуминга -->
+ <xs:complexType name="ОрганизацияОтправитель">
+ <xs:attribute name="Ид" type="ИдУчастЭДО" use="required"/>
+ <xs:attribute name="ИНН" type="ИННТип" use="required"/>
+ <xs:attribute name="КПП" type="КППТип" use="optional"/>
+ <xs:attribute name="НаимОрг" type="xs:string" use="required"/>
+ </xs:complexType>
+ 
+ <!-- Организация получатель для автороуминга -->
+ <xs:complexType name="ОрганизацияПолучатель">
+ <xs:attribute name="Ид" type="ИдУчастЭДО" use="required"/>
+ <xs:attribute name="ИНН" type="ИННТип" use="optional"/>
+ <xs:attribute name="КПП" type="КППТип" use="optional"/>
+
+ <xs:attribute name="НаимОрг" type="xs:string" use="optional"/>
+ </xs:complexType>
+ 
+ <!-- Документ -->
+ <xs:complexType name="Документ">
+ <xs:sequence minOccurs="1" maxOccurs="1">
+ <xs:element name="КДокументу" type="Идентификатор" minOccurs="0" maxOccurs="unbounded"/>
+ <xs:element name="ИдВнутренний" type="xs:string" minOccurs="0" maxOccurs="1"/>
+ <xs:element name="ИдСделки" type="xs:string" minOccurs="0" maxOccurs="1"/>
+ <xs:element name="Номер" type="xs:string" minOccurs="0" maxOccurs="1"/>
+ <xs:element name="Дата" type="xs:date" minOccurs="1" maxOccurs="1"/>
+ <xs:element name="Сумма" type="xs:decimal" minOccurs="0" maxOccurs="1"/>
+ <xs:element name="СуммаНДС" type="xs:decimal" minOccurs="0" maxOccurs="1"/>
+ <xs:element name="ДополнительныеДанные" minOccurs="0" maxOccurs="1">
+ <xs:complexType>
+ <xs:sequence>
+ <xs:element name="ДополнительныйПараметр" maxOccurs="unbounded">
+ <xs:complexType>
+ <xs:attribute name="Название" use="required"/>
+ <xs:attribute name="Значение" use="required"/>
+ </xs:complexType>
+ </xs:element>
+ </xs:sequence>
+ </xs:complexType>
+ </xs:element>
+ </xs:sequence>
+ <xs:attribute name="ИдДокумента" type="Идентификатор" use="required"/>
+ <xs:attribute name="ТипДокумента" type="ТипДокумента" use="required"/>
+ <xs:attribute name="ОжидаетсяПодписьПолучателя" type="xs:boolean" use="optional" 
+default="false"/>
+ <xs:attribute name="ИмяФайла" type="ИмяФайла" use="required"/>
+ <xs:attribute name="Зашифрован" type="xs:boolean" use="optional" default="false"/>
+ </xs:complexType>
+ 
+ <!-- Электронная подпись -->
+ <xs:complexType name="ЭП">
+ <xs:attribute name="Подписант" type="ИдУчастЭДО" use="required"/>
+ <xs:attribute name="ИдЭП" type="Идентификатор" use="required"/>
+ <xs:attribute name="КДокументу" type="Идентификатор" use="required"/>
+ </xs:complexType>
+ 
+ <!-- Квитанции -->
+ <xs:complexType name="Квитанции">
+ <xs:sequence minOccurs="1" maxOccurs="1">
+ <xs:element name="ОшибкаОбработки" type="КвитанцияОшибкаОбработки" minOccurs="0" 
+maxOccurs="unbounded"/>
+ <xs:element name="НеизвестныйИд" type="КвитанцияОшибкаНеизвестныйИд" minOccurs="0" 
+maxOccurs="unbounded"/>
+ <xs:element name="Успех" type="КвитанцияУспех" minOccurs="0" maxOccurs="unbounded"/>
+ </xs:sequence>
+ <xs:attribute name="ДатаОтправки" use="required">
+ <xs:annotation>
+ <xs:documentation>Дата и время в формате UTC формирования квитанций</xs:documentation>
+ </xs:annotation>
+ </xs:attribute>
+ <xs:attribute name="Получатель" type="ИдОЭДО" use="required">
+ <xs:annotation>
+ <xs:documentation>Указывается наименование оператора получателя ЛС</xs:documentation>
+ </xs:annotation>
+ </xs:attribute>
+ </xs:complexType>
+ 
+ <!-- Квитанция "Успех" -->
+ <xs:complexType name="КвитанцияУспех">
+ <xs:annotation>
+ <xs:documentation>
+ Свидетельствует об успешной обработке ЛС с соответствующим идентификатором
+ </xs:documentation>
+ </xs:annotation>
+ <xs:sequence minOccurs="1" maxOccurs="1">
+ <xs:element name="Документ" type="Документ" minOccurs="0" maxOccurs="unbounded"/>
+ <xs:element name="ЭП" type="ЭП" minOccurs="0" maxOccurs="unbounded"/>
+ </xs:sequence>
+ <xs:attribute name="ИдЛС" type="Идентификатор" use="required"/>
+ </xs:complexType>
+ 
+ <!-- Квитанция "Неизвестный ИД" -->
+ <xs:complexType name="КвитанцияОшибкаНеизвестныйИд">
+ <xs:annotation>
+ <xs:documentation>
+ Документ или ЭП из обрабатываемого ЛС ссылается на неизвестный системе документ.
+ Эта ошибка может возникать, если ТП с хронологически более поздними документами будет по 
+какой-то причине
+ (например, из-за разового сбоя транспорта) получено и обработано ранее,
+ ТП с хронологически более ранними документами.
+ Необходимо повторить отправку данного ЛС через некоторое время.
+ Если ошибка повторяется постоянно, разобраться в причинах ошибки и устранить их вручную.
+ </xs:documentation>
+ </xs:annotation>
+ <xs:sequence minOccurs="1" maxOccurs="1">
+ <xs:element name="Ид" type="Идентификатор" minOccurs="1" maxOccurs="unbounded">
+ <xs:annotation>
+ <xs:documentation>
+ Перечень неизвестных системе идентификаторов
+ </xs:documentation>
+ </xs:annotation>
+ </xs:element>
+ <xs:element name="Описание" type="xs:string" minOccurs="1" maxOccurs="1"/>
+ </xs:sequence>
+ <xs:attribute name="ИдЛС" type="Идентификатор" use="required"/>
+ </xs:complexType>
+ 
+ <!-- Квитанция "Ошибка обработки" -->
+ <xs:complexType name="КвитанцияОшибкаОбработки">
+ <xs:annotation>
+ <xs:documentation>
+ В процессе обработки возникла какая-либо другая ошибка.
+ Необходимо разобраться в причинах ошибки и устранить их вручную.
+ </xs:documentation>
+ </xs:annotation>
+ <xs:sequence minOccurs="1" maxOccurs="1">
+ <xs:element name="Описание" type="xs:string" minOccurs="1" maxOccurs="1"/>
+ </xs:sequence>
+ <xs:attribute name="ИдЛС" type="Идентификатор" use="required"/>
+ </xs:complexType>
+ 
+ <!-- Определения простых типов -->
+ <xs:simpleType name="ТипДокумента">
+ <xs:restriction base="xs:string">
+ <xs:enumeration value="Неформализованный"/>
+ <xs:enumeration value="ОтказПодписи"/>
+ <xs:enumeration value="ТН"/>
+
+ <xs:enumeration value="ТТН"/>
+ <xs:enumeration value="Акт"/>
+ <xs:enumeration value="АктСверки"/>
+ <xs:enumeration value="ПлатПоруч"/>
+ <xs:enumeration value="Договор"/>
+ <xs:enumeration value="Заказ"/>
+ <xs:enumeration value="СФ"/>
+ <xs:enumeration value="ПодтверждениеОператора"/>
+ <xs:enumeration value="ИзвещениеОПолучении"/>
+ <xs:enumeration value="УведомлениеОбУточнении"/>
+ <xs:enumeration value="ПредложениеОбАннулировании"/>
+ <xs:enumeration value="Торг12ТитулПродавца"/>
+ <xs:enumeration value="Торг12ТитулПокупателя"/>
+ <xs:enumeration value="Торг2ТитулДополнительныхСведенийПоРезультатамПриемки"/>
+ <xs:enumeration value="Торг2ТитулПокупателя"/>
+ <xs:enumeration value="АктТитулЗаказчика"/>
+ <xs:enumeration value="АктТитулИсполнителя"/>
+ <xs:enumeration value="КС-11"/>
+ <xs:enumeration value="КС-2"/>
+ <xs:enumeration value="КС-3"/>
+ <xs:enumeration value="Ведомость"/>
+ <xs:enumeration value="ДокументОПередачеРезультатовРаботИсполнитель"/>
+ <xs:enumeration value="ДокументОПередачеРезультатовРаботЗаказчик"/>
+ <xs:enumeration value="ДокументОПередачеТоваровПриТорговыхОперацияхПродавец"/>
+ <xs:enumeration value="ДокументОПередачеТоваровПриТорговыхОперацияхПокупатель"/>
+ <xs:enumeration value="СЧФ"/>
+ <xs:enumeration value="СЧФДОППродавец"/>
+ <xs:enumeration value="СЧФДОППокупатель"/>
+ <xs:enumeration value="ДОППродавецНакладная"/>
+ <xs:enumeration value="ДОППродавецАкт"/>
+ <xs:enumeration value="ДОППокупательНакладная"/>
+ <xs:enumeration value="ДОППокупательАкт"/>
+ <xs:enumeration value="ДОППродавец"/>
+ <xs:enumeration value="ДОППокупатель"/>
+ <xs:enumeration value="КорСЧФ"/>
+ <xs:enumeration value="КорСЧФДИСПродавец"/>
+ <xs:enumeration value="КорСЧФДИСПокупатель"/>
+ <xs:enumeration value="КорДИСПродавецНакладная"/>
+ <xs:enumeration value="КорДИСПродавецАкт"/>
+ <xs:enumeration value="КорДИСПокупательНакладная"/>
+ <xs:enumeration value="КорДИСПокупательАкт"/>
+ <xs:enumeration value="КорДИСПродавец"/>
+ <xs:enumeration value="КорДИСПокупатель"/>
+ <xs:enumeration value="Счет"/> 
+ <xs:enumeration value="СтруктурированныеДанные">
+<xs:annotation>
+ <xs:documentation>
+ Структурированные данные (например в формате xml),
+ передаваемые вместе с печатной формой документа.
+ У документа такого типа скорее всего должен быть указан идентификатор КДокументу
+ </xs:documentation>
+ </xs:annotation>
+ </xs:enumeration>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+ <!-- Тип запроса в приглашении -->
+ <xs:simpleType name="ТипЗапроса">
+ <xs:annotation>
+ <xs:documentation>
+ При отправке приглашения и принятии приглашения необходимо указывать тип "Запрос".
+40
+ Для отказа в принятии прглашения необходимо указывать тип "Разрыв".
+ Для разрыва уже установленного ЭДО необходимо указывать тип "Разрыв".
+ </xs:documentation>
+ </xs:annotation>
+ <xs:restriction base="xs:string">
+ <xs:enumeration value="Запрос"/>
+ <xs:enumeration value="Разрыв"/>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+ <!-- Идентификатор -->
+ <xs:simpleType name="Идентификатор">
+ <xs:restriction base="xs:string">
+ <xs:pattern value="[a-z0-9]{32}"/>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+ <!-- Идентификатор участника ЭДО -->
+ <xs:simpleType name="ИдУчастЭДО">
+ <xs:annotation>
+ <xs:documentation>
+ Идентификатор участника документооборота
+ Формат идентификатора: [ИдентификаторОператора>][ИдентификаторАбонента].
+ ИдентификаторАбонента может быть уникален лишь в рамках одного оператора, длина не более 43 
+символов.
+ ИдентификаторОператора должен быть глобально уникальным, длина 3 символа.
+ </xs:documentation>
+ </xs:annotation>
+ <xs:restriction base="xs:string">
+ <xs:minLength value="3"/>
+ <xs:maxLength value="46"/>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+ <!-- Идентификатор оператора -->
+ <xs:simpleType name="ИдОЭДО">
+ <xs:annotation>
+ <xs:documentation>
+ Идентификатор оператора должен быть глобально уникальным, длина 3 символа.
+ </xs:documentation>
+ </xs:annotation>
+ <xs:restriction base="xs:string">
+ <xs:length value="3"/>
+ <xs:pattern value="[A-Z0-9]{3}"/>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+ <!-- Имя файла -->
+ <xs:simpleType name="ИмяФайла">
+ <xs:restriction base="xs:string">
+ <xs:pattern value="[^/\\:?*]{1,255}"/>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+ <!-- ДатаВремяUTC -->
+ <xs:simpleType name="ДатаВремяUTC">
+ <xs:restriction base="xs:dateTime">
+ <xs:pattern value=".+T.+Z"/>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+
+ <!-- Тип для ИНН -->
+ <xs:simpleType name="ИННТип">
+ <xs:annotation>
+ <xs:documentation>Идентификационный номер налогоплательщика</xs:documentation>
+ </xs:annotation>
+ <xs:restriction base="xs:string">
+ <xs:minLength value="10"/>
+ <xs:maxLength value="12"/>
+ <xs:pattern value="([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}"/>
+ <xs:pattern value="([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{10}"/>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+ <!-- Тип для КПП -->
+ <xs:simpleType name="КППТип">
+ <xs:annotation>
+ <xs:documentation>Код причины постановки на учет (КПП) </xs:documentation>
+ </xs:annotation>
+ <xs:restriction base="xs:string">
+ <xs:length value="9"/>
+ <xs:pattern value="([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-F]{2})([0-9]{3})"/>
+ </xs:restriction>
+ </xs:simpleType>
+ 
+</xs:schema>
